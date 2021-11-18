@@ -15,7 +15,7 @@ namespace GoogleDrive
 {
     public class GoogleDriveService
     {
-        private Settings settings = null;
+        private readonly Settings settings = null;
         private DriveService service;
 
         public GoogleDriveService(Settings settings_)
@@ -28,7 +28,7 @@ namespace GoogleDrive
             this.settings = new Settings
             {
                 ApplicationName = ApplicationName_,
-                CredentialsPath = UserCredentialPath_,
+                CredentialsPath = CretentialsPath_,
                 UserCredentialPath = UserCredentialPath_
             };
         }
@@ -37,15 +37,15 @@ namespace GoogleDrive
         {
             UserCredential credential;
 
-            using (var stream = new FileStream(this.settings.CredentialsPath, FileMode.Open, FileAccess.Read))
-            {
-                credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
-                    this.settings.Scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(this.settings.UserCredentialPath, true));
-            }
+            var clientSecrets = await GoogleClientSecrets.FromFileAsync(this.settings.CredentialsPath, token);
+
+            credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
+                clientSecrets.Secrets,
+                this.settings.Scopes,
+                "user",
+                CancellationToken.None,
+                new FileDataStore(this.settings.UserCredentialPath, true));
+
 
             if (credential.Token.IsExpired(Google.Apis.Util.SystemClock.Default))
             {
@@ -106,8 +106,12 @@ namespace GoogleDrive
 
             var t = await GetFileId(fileinfo.Name, destination);
 
+            Log.Information($"Processing file: {fileinfo.FullName}");
+
+
             if (t != null)
             {
+                Log.Debug($"File already exists");
                 return;
             }
 
@@ -118,99 +122,98 @@ namespace GoogleDrive
 
             };
 
-            await using (var source = new FileStream(fileinfo.FullName, FileMode.Open, FileAccess.Read))
+            await using var source = new FileStream(fileinfo.FullName, FileMode.Open, FileAccess.Read);
+
+            var request = service.Files.Create(fileMetadata, source, fileinfo.MimeType().GetString());
+            request.Fields = "*";
+
+            int parts = 50;
+
+            Console.WriteLine($"Uploading file: {fileinfo.FullName}");
+
+            var (Left, Top) = Console.GetCursorPosition();
+
+
+            for (var j = 0; j < parts; j++)
             {
-                var request = service.Files.Create(fileMetadata, source, fileinfo.MimeType().GetString());
-                request.Fields = "*";
-
-                int parts = 50;
-
-                Console.WriteLine($"Uploading file: {fileinfo.FullName}");
-
-                var barPosition = Console.GetCursorPosition();
+                Console.Write("-");
+            }
+            Console.Write(" | ");
 
 
-                for (var j = 0; j < parts; j++)
+            Console.Write($"0/{fileinfo.Length / 1000000} MB | ");
+
+            Console.Write("0 s");
+
+
+            long totalLength = request.ContentStream.Length;
+            long bytesSent = 0;
+            var startingTime = DateTime.Now;
+
+            request.ProgressChanged += prog =>
+            {
+                bytesSent = prog.BytesSent;
+
+
+                Console.SetCursorPosition(Left, Top);
+
+                int slotsSent = (int)((float)parts * bytesSent / totalLength);
+
+
+                for (int i = 0; i < parts; i++)
                 {
-                    Console.Write("-");
+                    if (i < slotsSent)
+                        Console.Write("#");
+                    else
+                        Console.Write("-");
                 }
                 Console.Write(" | ");
 
+                Console.Write($"{bytesSent / 1000000}/{totalLength / 1000000} MB | ");
 
-                Console.Write($"0/{fileinfo.Length / 1000000} MB | ");
+                Console.Write($"{(int)(DateTime.Now - startingTime).TotalSeconds} s | ");
 
-                Console.Write("0 s");
-
-
-                long totalLength = request.ContentStream.Length;
-                long bytesSent = 0;
-                var startingTime = DateTime.Now;
-
-                request.ProgressChanged += prog =>
+                if (prog.Status == Google.Apis.Upload.UploadStatus.Completed)
                 {
-                    bytesSent = prog.BytesSent;
-
-
-                    Console.SetCursorPosition(barPosition.Left, barPosition.Top);
-
-                    int slotsSent = (int)((float)parts * bytesSent / totalLength);
-
-
-                    for (int i = 0; i < parts; i++)
-                    {
-                        if (i < slotsSent)
-                            Console.Write("#");
-                        else
-                            Console.Write("-");
-                    }
-                    Console.Write(" | ");
-
-                    Console.Write($"{bytesSent / 1000000}/{totalLength / 1000000} MB | ");
-
-                    Console.Write($"{(int)(DateTime.Now - startingTime).TotalSeconds} s | ");
-
-                    if (prog.Status == Google.Apis.Upload.UploadStatus.Completed)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write("Completed       ");
-                        Console.ResetColor();
-                    }
-                    else if (prog.Status == Google.Apis.Upload.UploadStatus.Failed)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write("ERROR         ");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write("In Progress      ");
-                        Console.ResetColor();
-                    }
-
-                };
-
-                try
-                {
-
-                    var result = await request.UploadAsync(CancellationToken.None);
-
-                    Console.WriteLine();
-
-                    if (result.Status == Google.Apis.Upload.UploadStatus.Failed)
-                    {
-                        Log.Error(result.Exception.Message);
-                    }
-                    else
-                    {
-                        Log.Information($"File uploaded: {fileinfo.FullName}");
-                    }
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("Completed       ");
+                    Console.ResetColor();
                 }
-                catch (Exception e)
+                else if (prog.Status == Google.Apis.Upload.UploadStatus.Failed)
                 {
-                    Log.Error(e.Message);
-                    throw;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("ERROR         ");
+                    Console.ResetColor();
                 }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write("In Progress      ");
+                    Console.ResetColor();
+                }
+
+            };
+
+            try
+            {
+
+                var result = await request.UploadAsync(CancellationToken.None);
+
+                Console.WriteLine();
+
+                if (result.Status == Google.Apis.Upload.UploadStatus.Failed)
+                {
+                    Log.Error(result.Exception.Message);
+                }
+                else
+                {
+                    Log.Information($"File uploaded: {fileinfo.FullName}");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e.Message);
+                throw;
             }
 
         }
@@ -302,7 +305,7 @@ namespace GoogleDrive
 
 
             var request = service.Files.List();
-            request.Q += $" name = '{fileName.Replace(@"'",@"\'")}'";
+            request.Q += $" name = '{fileName.Replace(@"'", @"\'")}'";
             request.Q += " and mimeType != 'application/vnd.google-apps.folder' ";
             request.Q += $" and 'ldellisola@itba.edu.ar' in owners";
 

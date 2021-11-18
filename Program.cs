@@ -1,20 +1,20 @@
-﻿using Google.Apis.Drive.v3;
-using System.Linq;
+﻿using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using Serilog;
 using System;
+using Google.Apis.Drive.v3;
 
 namespace GoogleDrive
 {
     class Program
     {
+        static readonly string ApplicationName = "GDrive Uploader";
+        static readonly string Credentials = "Credentials.json";
+        static readonly string UserCreadentials = "token.json";
+        static readonly string LogFile = "GoogleDrive.log";
 
-        static string ApplicationName = "GDrive Uploader";
-        static string Credentials = "Credentials.json";
-        static string UserCreadentials = "token.json";
-        static string LogFile = "GoogleDrive.log";
-        static async Task Main(string[] args)
+        static async Task Main()
         {
 
             // Set up
@@ -37,9 +37,6 @@ namespace GoogleDrive
             var paths = PathStorage.GetInstance();
             var mediaSettings = MediaSettings.GetInstance();
 
-            // Retrieve files
-            string pattern = @$"*\.({mediaSettings.allowedExtensions.Aggregate((t, r) => t += $"|{r}")})";
-
             foreach (var folder in mediaSettings.folders)
             {
                 if (paths[folder.remote] == null)
@@ -47,13 +44,20 @@ namespace GoogleDrive
             }
 
             var files = mediaSettings.folders
-                            .ConvertAll(folder => Tuple.Create(folder, System.IO.Directory.GetFiles(folder.local, pattern, SearchOption.AllDirectories)))
+                            .ConvertAll(folder =>
+                            {
+                                var files = mediaSettings.allowedExtensions
+                                             .ConvertAll(ext => System.IO.Directory.GetFiles(folder.local, $"*.{ext}", SearchOption.AllDirectories))
+                                             .SelectMany(t => t);
+
+                                return Tuple.Create(folder,files);
+                            })
                             .SelectMany(tuple => tuple.Item2.ToList().ConvertAll(r => Tuple.Create(tuple.Item1, r)))
                             .OrderBy(tuple => tuple.Item2)
                             .ToList();
 
             // Upload
-            foreach( var fileTuple in files)
+            foreach (var fileTuple in files)
             {
                 var file = fileTuple.Item2;
                 var folder = fileTuple.Item1;

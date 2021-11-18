@@ -1,20 +1,16 @@
 {
   "folders": [
     {
-      "local": "/home/media/Drive/TV",
-      "remote": "TV"
-    },
-    {
-      "local": "/home/media/Drive/Movies",
-      "remote": "Movies"
+      "local": "C:\\Users\\luckd\\Desktop\\files",
+      "remote": "test"
     }
   ],
   "allowedExtensions": [
-    ".mkv",
-    ".flv",
-    ".mp4",
-    ".mov",
-    ".avi",
-    ".wmv"
+    "mkv",
+    "flv",
+    "mp4",
+    "mov",
+    "avi",
+    "wmv"
   ]
 }

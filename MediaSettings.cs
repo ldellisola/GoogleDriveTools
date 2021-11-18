@@ -14,7 +14,7 @@ namespace GoogleDrive
         [JsonIgnore]
         private static MediaSettings Reference { get; set; } = null;
         [JsonIgnore]
-        private static string SerializedStorage = @"MediaSettings.json";
+        private static readonly string SerializedStorage = @"MediaSettings.json";
         public static MediaSettings GetInstance()
         {
             if (Reference != null)
@@ -33,12 +33,9 @@ namespace GoogleDrive
         }
 
         [JsonInclude]
-        public List<Folder> folders = new List<Folder>();
+        public List<Folder> folders = new();
         [JsonInclude]
-        public List<string> allowedExtensions = new List<string>();
-
-        //{ ".mkv", ".flv", ".mp4", ".mov", ".avi", ".wmv" };
-
+        public List<string> allowedExtensions = new();
 
         public class Folder
         {
