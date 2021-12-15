@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDriveTools.Transcoder", "GoogleDriveTools.Transcoder\GoogleDriveTools.Transcoder.csproj", "{385DB969-7E15-46BC-91BA-497E941664EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleDriveTools.Uploader", "GoogleDriveTools.Uploader\GoogleDriveTools.Uploader.csproj", "{F2BA208C-E0FE-4080-8C8D-A314806C6733}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDriveTools.Uploader", "GoogleDriveTools.Uploader\GoogleDriveTools.Uploader.csproj", "{F2BA208C-E0FE-4080-8C8D-A314806C6733}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleDriveTools.Eraser", "GoogleDriveTools.Eraser\GoogleDriveTools.Eraser.csproj", "{42A34C2C-3871-4C27-9693-3E59CA1B677C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +13,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{385DB969-7E15-46BC-91BA-497E941664EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{385DB969-7E15-46BC-91BA-497E941664EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{385DB969-7E15-46BC-91BA-497E941664EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{385DB969-7E15-46BC-91BA-497E941664EE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F2BA208C-E0FE-4080-8C8D-A314806C6733}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F2BA208C-E0FE-4080-8C8D-A314806C6733}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F2BA208C-E0FE-4080-8C8D-A314806C6733}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2BA208C-E0FE-4080-8C8D-A314806C6733}.Release|Any CPU.Build.0 = Release|Any CPU
+		{42A34C2C-3871-4C27-9693-3E59CA1B677C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42A34C2C-3871-4C27-9693-3E59CA1B677C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42A34C2C-3871-4C27-9693-3E59CA1B677C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42A34C2C-3871-4C27-9693-3E59CA1B677C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
