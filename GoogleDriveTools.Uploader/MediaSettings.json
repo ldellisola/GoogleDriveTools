@@ -1,0 +1,16 @@
+{
+  "folders": [
+    {
+      "Local": "C:\\Users\\ldellisola\\source\\repos\\GoogleDriveTools\\GoogleDriveTools.Uploader\\bin\\Debug\\net6.0\\Test",
+      "Remote": "Test"
+    }
+  ],
+  "allowedExtensions": [
+    ".mkv",
+    ".flv",
+    ".mp4",
+    ".mov",
+    ".avi",
+    ".wmv"
+  ]
+}
