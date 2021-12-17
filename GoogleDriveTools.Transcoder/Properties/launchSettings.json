@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "GoogleDriveTools.Transcoder": {
+      "commandName": "Project",
+      "commandLineArgs": "--test hola",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true
+    }
+  }
+}

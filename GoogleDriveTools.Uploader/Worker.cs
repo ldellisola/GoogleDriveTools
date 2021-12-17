@@ -21,8 +21,6 @@ namespace GoogleDriveTools.Uploader
             {
                 _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
 
-                var a = _configuration.GetValue<List<InspectedFolder>>("MediaSettings:InspectedFolders");
-
                 var driveSettings = new SimpleGoogleDrive.Models.DriveAuthorizationSettings(
                                                                         _configuration["GoogleDrive:AppName"],
                                                                         new FileInfo(_configuration["GoogleDrive:CredentialsPath"]),
